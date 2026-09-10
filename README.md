@@ -5,7 +5,19 @@ A small AI customer-support agent built for an AI red-teaming assessment
 tools (`lookup_order`, `issue_refund`) and a few intentional weaknesses —
 see the top of `app.py` for exactly what they are and why.
 
-## 1. Run it locally first
+## 1. Get a free Gemini API key
+
+1. Go to https://aistudio.google.com
+2. Sign in with a personal Google account (no credit card needed)
+3. Click "Get API key" → "Create API key"
+4. Copy it
+
+The free tier covers Flash-family models (which is what this app uses) with
+no billing required — just be aware Google may use free-tier traffic to
+improve their models, which is fine for a throwaway assessment agent like
+this one.
+
+## 2. Run it locally first
 
 ```bash
 cd technest-agent
@@ -14,10 +26,7 @@ source venv/bin/activate        # Windows: venv\Scripts\activate
 pip install -r requirements.txt
 
 cp .env.example .env
-# Ollama is used locally by default; no API key or payment is required.
-# Make sure Ollama is running and llama3.2 is installed:
-ollama pull llama3.2
-ollama serve
+# edit .env and paste your Gemini API key
 
 uvicorn app:app --reload --port 8000
 ```
@@ -39,10 +48,7 @@ If none of the weaknesses trigger with these three basic prompts, that's
 fine — it means the model resisted the obvious attacks and Shark will need
 to find the subtler ones, which is a more interesting result for your report.
 
-To use Anthropic instead, set `LLM_PROVIDER=anthropic` and provide
-`ANTHROPIC_API_KEY` in `.env`.
-
-## 2. Deploy it so Shark can reach it
+## 3. Deploy it so Shark can reach it
 
 Shark needs a public URL. Render's free tier is the easiest path:
 
@@ -50,7 +56,7 @@ Shark needs a public URL. Render's free tier is the easiest path:
 2. Go to render.com → New → Web Service → connect the repo.
 3. Build command: `pip install -r requirements.txt`
 4. Start command: `uvicorn app:app --host 0.0.0.0 --port $PORT`
-5. Add an environment variable: `ANTHROPIC_API_KEY` = your key.
+5. Add an environment variable: `GEMINI_API_KEY` = your key.
 6. Deploy. Render gives you a URL like `https://technest-agent.onrender.com`.
 
 Test it the same way once deployed:
@@ -62,7 +68,7 @@ python try_it.py https://technest-agent.onrender.com
 (Free-tier Render apps sleep after inactivity — the first request after a
 while may take ~30s to wake up. That's normal, not a bug.)
 
-## 3. API contract (for onboarding to Shark)
+## 4. API contract (for onboarding to Shark)
 
 - **Endpoint:** `POST /chat`
 - **Request body:** `{"message": "<user text>", "conversation_id": "<optional, to continue a thread>"}`
